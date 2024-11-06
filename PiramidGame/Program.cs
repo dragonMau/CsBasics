@@ -60,10 +60,6 @@ class Game
         availble_moves = [false, false, false, false, false, false];
         field = new(w * h);
     }
-    public void Reset()
-    {
-        poles = [new([4, 3, 2, 1]), new(4), new(4)];
-    }
     public void Play()
     {
         string? input;
