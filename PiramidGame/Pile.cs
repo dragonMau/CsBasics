@@ -1,4 +1,8 @@
-﻿class Pile<T>
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Pile<T>
 {
     private readonly T[] _array;
     private int _height;

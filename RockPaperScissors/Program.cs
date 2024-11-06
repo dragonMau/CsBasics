@@ -25,7 +25,7 @@ class Program
                 Console.Write("\rChoose your move: ");
                 response = Console.ReadLine();
                 if (response == null || response.Length == 0) { response = "null"; }
-                move = response.ToLower().First();
+                move = response.ToLower()[0];
                 userMove = move switch
                 {
                     'r' => 0,
