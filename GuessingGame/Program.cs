@@ -2,9 +2,9 @@
 
 class GuessingGame
 {
-    public static void Main(string[] args)
+    public static void Main()
     {
-        Random rand = new Random();
+        Random rand = new();
         int number, attempts, guess;
         char playingResponse;
         bool playing = true;
@@ -16,7 +16,6 @@ class GuessingGame
         {
             number = rand.Next(min, max + 1);
             attempts = 0;
-            guess = 0;
 
             Console.WriteLine("Guess random number between " + min + " - " + max + ":");
 

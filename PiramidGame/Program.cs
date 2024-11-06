@@ -1,51 +1,94 @@
 ﻿using System.Text;
-
+/*
+Solution:
+0
+1
+3
+0
+4
+5
+0
+1
+3
+2
+4
+3
+0
+1
+3
+ */
 class Program
 {
     static void Main()
     {
+        bool playing = true;
         Game game = new();
-        game.Play();
+
+        while (playing)
+        {
+            game.Play();
+
+            Console.Write("\nPlay again? (Y/n): ");
+            char Response = Console.ReadKey().KeyChar;
+            Console.WriteLine("\n");
+            if (!"yY \r\n".Contains(Response))
+            {
+                playing = false;
+                Console.WriteLine("Have a nice day!");
+            }
+        }
     }
 }
 
 
 class Game
 {
-    private static string[] disks = ["         ", "    #    ", "   ###   ", "  #####  ", " ####### "];
+    private static readonly string[] disks = ["         ", "    #    ", "   ###   ", "  #####  ", " ####### "];
+    static readonly int[,] moveOrder = { { 0, 1 }, { 0, 2 }, { 1, 0 }, { 1, 2 }, { 2, 0 }, { 2, 1 } };
 
-    Pile<int>[] poles = [new([4, 3, 2, 1]), new(4), new(4)];
-
-    static int[,] moveOrder = { { 0, 1 }, { 0, 2 }, { 1, 0 }, { 1, 2 }, { 2, 0 }, { 2, 1 } };
-    bool[] moves = [false, false, false, false, false, false];
+    Pile<int>[] poles;
+    readonly bool[] availble_moves;
+    readonly StringBuilder field;
 
     const int w = 32;
     const int h = 6;
     const int s = 10;
-    StringBuilder field = new(w * h);
+
+    public Game()
+    {
+        poles = [new([4, 3, 2, 1]), new(4), new(4)];
+        availble_moves = [false, false, false, false, false, false];
+        field = new(w * h);
+    }
+    public void Reset()
+    {
+        poles = [new([4, 3, 2, 1]), new(4), new(4)];
+    }
     public void Play()
     {
         string? input;
         int move;
+        int n = 0;
+        poles = [new([4, 3, 2, 1]), new(4), new(4)];
 
-        while (true)
+        while (!CheckWin())
         {
-            updateField();
-            updateMoves();
+            UpdateField();
+            UpdateMoves();
 
             Console.Write(field.ToString());
             Console.WriteLine("moves:");
 
             for (int i = 0; i < 6; i++)
             {
-                if (moves[i])
+                if (availble_moves[i])
                 {
                     Console.WriteLine("    " + i + ": " + moveOrder[i, 0] + " to " + moveOrder[i, 1] + ".");
                 }
             }
 
             Console.Write("Your move: ");
-            while ((input = Console.ReadLine()) == null || !int.TryParse(input, out move) || !moves.ElementAtOrDefault(move))
+            while ((input = Console.ReadLine()) == null || !int.TryParse(input, out move) || !availble_moves.ElementAtOrDefault(move))
             {
                 Console.Write("move '" + input + "' is not valid move.\nYour move: ");
             }
@@ -55,10 +98,18 @@ class Game
             );
 
             Console.WriteLine();
+            n++;
         }
+        UpdateField();
+        Console.Write(field.ToString());
+        Console.WriteLine("You won in " + n + " moves!");
     }
 
-    bool isMove(int poleA, int poleB) // pole indexes
+    bool CheckWin()
+    {
+        return poles[2].Values.SequenceEqual([4, 3, 2, 1]);
+    }
+    bool IsMove(int poleA, int poleB) // pole indexes
     {
         int diskA = poles[poleA].Get();
         int diskB = poles[poleB].Get();
@@ -73,14 +124,14 @@ class Game
             return false;
         }
     }
-    void updateMoves()
+    void UpdateMoves()
     {
         for (int i = 0; i < 6; i++)
         {
-            moves[i] = isMove(moveOrder[i, 0], moveOrder[i, 1]);
+            availble_moves[i] = IsMove(moveOrder[i, 0], moveOrder[i, 1]);
         }
     }
-    void updateField()
+    void UpdateField()
     {
         /*
          * -------------------------------
@@ -118,69 +169,4 @@ class Game
             field[1 * w + i * s + 2] = ':';
         }
     }
-}
-
-class Pile<T>
-{
-    private T[] _array;
-    private int _height;
-    public Pile()
-    {
-        _array = [];
-    }
-
-    // Create a pile with a specific initial capacity.  The initial capacity
-    // must be a non-negative number.
-    public Pile(int capacity)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(capacity);
-        _array = new T[capacity];
-        _height = 0;
-    }
-
-    // Fills a Pile with the contents of a particular collection.
-    public Pile(IEnumerable<T> collection)
-    {
-        ArgumentNullException.ThrowIfNull(collection);
-        _array = collection.ToArray();
-        _height = _array.Length;
-    }
-
-    public Pile(IEnumerable<T> collection, int capacity)
-    {
-        ArgumentNullException.ThrowIfNull(collection);
-        _array = collection.ToArray();
-        if (capacity < _array.Length) throw new ArgumentOutOfRangeException();
-        Array.Resize(ref _array, capacity);
-    }
-
-    // Returns the top object on the pile without removing it.  If the pile
-    // is empty, returns default
-    public T? Get()
-    {
-        return Get(_height-1);
-    }
-
-    // Returns object at index from the pile without removing it.  If the pile
-    // is index is out of bounds or pile is empty, returns default
-    public T? Get(int index)
-    {
-        if (index < 0) index = _array.Length + index;
-        if (index < 0 || index >= _array.Length) return default;
-        else return _array[index];
-    }
-
-    public T Pop()
-    {
-        T item = _array[_height - 1];
-        _array[_height - 1] = default!;
-        --_height;
-        return item;
-    }
-    public void Push(T item)
-    {
-        _array[_height] = item;
-        ++_height;
-    }
-    public T[] Values { get { return _array; } }
 }

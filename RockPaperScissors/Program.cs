@@ -2,9 +2,9 @@
 
 class Program
 {
-    public static void Main(string[] args)
+    public static void Main()
     {
-        Random rand = new Random();
+        Random rand = new();
         bool running = true;
         int computerMove;
         int userMove;
